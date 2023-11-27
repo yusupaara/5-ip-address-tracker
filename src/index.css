@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    .default-action {
+        @apply cursor-pointer min-h-max flex items-center px-5 bg-primary-xdark rounded-r-xl enabled:hover:bg-black enabled:hover:-translate-x-0.5 enabled:active:bg-primary-xdark transform transition disabled:opacity-60 disabled:cursor-default disabled:translate-y-0
+    }
+}
