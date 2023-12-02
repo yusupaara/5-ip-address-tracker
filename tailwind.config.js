@@ -9,6 +9,10 @@ module.exports = {
         primary: {
           xdark: 'hsl(0, 0%, 17%)',
           dark: 'hsl(0, 0%, 59%)',
+        },
+        side: {
+          tr10: 'hsla(0, 0%, 0%, 0.1)',
+          tr50: 'hsla(0, 0%, 0%, 0.5)',
         }
       },
       fontFamily: {

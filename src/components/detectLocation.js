@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import arrowicon from "../images/icon-arrow.svg";
 import caretdown from "../images/caret-down-solid.svg";
 
-export default function DetectLocation({ setMapLocation }) {
+export default function DetectLocation({ setMapLocation, currentLocation, historyLocation }) {
   const [ip, setIp] = useState("");
   const [isValid, setIsValid] = useState(true);
   const [buttonActive, setButtonActive] = useState(false);
@@ -12,17 +12,18 @@ export default function DetectLocation({ setMapLocation }) {
   const [savedIp, setSavedIp] = useState("");
   const [location, setLocation] = useState("");
   const [isp, setIsp] = useState("");
-  const [ipV4, setIpV4] = useState("");
+  const [ipV4, setIpV4] = useState(true);
 
-  const config = {
-    headers: {
-      'Accept-Encoding': 'gzip, deflate, br'
-    }
-   };
+  const [savedData, setSavedData] = useState("")
 
-  const onInputChange = (data) => {
-    setIp(data.target.value);
+  let storageData = JSON.parse(localStorage.getItem("savedData")) || [];
+
+  const onInputChange = (data) => {  
     validateInput(data);
+  };
+
+  const onInputDone = (data) => {
+    setIp(data.target.value);
   };
 
   const validateInput = (e) => {
@@ -47,27 +48,56 @@ export default function DetectLocation({ setMapLocation }) {
     }
   };
 
-  const proceedInput = () => {
+  const proceedInput = useCallback(() => {
+    console.log('proceedInput called with ip:', ip);
     axios
       .get(
-        `https://geo.ipify.org/api/v2/country,city?apiKey=${process.env.REACT_APP_KEY_APIFY}&ipAddress=${ip}`, config
-      )
+        `https://geo.ipify.org/api/v2/country,city?apiKey=${process.env.REACT_APP_KEY_APIFY}&ipAddress=${ip}`)
       .then((response) => {
         setSavedIp(response.data.ip);
         setLocation(response.data.location);
         setMapLocation(response.data.location);
         setIsp(response.data.isp);
+
+        const ipExist = storageData.some(item => item.ip === response.data.ip);
+
+        if (!ipExist) {
+          storageData.push(response.data);
+          setSavedData(storageData);
+        }
+        
         if (ipV4) {
           setIpV4Completed(true);
         } else {
           setIpV4Completed(false);
-        }
-        console.log(ipV4, ipV4Completed);
+        };
+
       })
       .catch((error) => {
         console.error("Failed to fetch location data:", error);
       });
-  };
+  }, [ip]);
+
+  useEffect(() => {
+    if (currentLocation){
+      setIp("")
+      setIpV4(true)
+      proceedInput();
+    }
+  }, [currentLocation])
+
+  useEffect(() => {
+    if (historyLocation){
+      setIp(historyLocation.ip)
+      proceedInput();
+    }
+  }, [historyLocation])
+
+  useEffect(() => {
+    if (savedData){
+      localStorage.setItem("savedData", JSON.stringify(savedData));
+    }
+  }, [savedData])
 
   return (
     <div className="flex flex-col items-center text-default font-rubik font-normal space-y-6 p-6 bg-dekstop max-h-60 bg-cover bg-repeat animate-linear-background-sm md:animate-linear-background-md lg:animate-linear-background-lg xl:animate-linear-background-xl">
@@ -78,6 +108,7 @@ export default function DetectLocation({ setMapLocation }) {
           className="rounded-l-xl w-full h-12 placeholder-primary-dark focus:ring-0 focus:ring-offset-0 focus:outline-none pl-6"
           placeholder="Search for any IP address or domain"
           onChange={onInputChange}
+          onBlur={onInputDone}
         />
         {!isValid && (
           <div className="absolute h-12 flex items-center translate-y-10 pl-6 text-red-400 text-sm">
