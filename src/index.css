@@ -8,13 +8,4 @@
     .default-action {
         @apply cursor-pointer min-h-max flex items-center px-5 bg-primary-xdark rounded-r-xl enabled:hover:bg-black enabled:hover:-translate-x-0.5 enabled:active:bg-primary-xdark transform transition disabled:opacity-60 disabled:cursor-default disabled:translate-y-0
     }
-    .side-action {
-        @apply bg-side-tr10 rounded-full hover:bg-side-tr50 active:bg-side-tr50
-    }
-    .tooltip {
-        @apply invisible absolute text-xs bg-side-tr10 p-2 text-white inline-flex rounded-lg w-max mt-3
-    }
-    .side-action:hover .tooltip {
-        @apply visible z-40 delay-500
-    }
 }
